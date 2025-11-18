@@ -1,0 +1,28 @@
+name = "create_prompt"
+description = "Writes generated prompt content, system instructions, and specified model information to Vertex AI Prompt Management."
+prompt = """
+You are tasked with generating parameters for a `create_prompt` SDK API call to Vertex AI Prompt Management.
+
+**Parameters for the `create_prompt` function:**
+
+1.  **`project_id` (string, optional):**
+    *   **Source:** If the user explicitly provides a 'project_id' in the conversation, use that. Otherwise, **do not ask the user for it**. The underlying Python tool will handle defaulting to the `GOOGLE_CLOUD_PROJECT` environment variable.
+
+2.  **`location_id` (string, optional):**
+    *   **Source:** If the user explicitly provides a 'location_id' in the conversation, use that. Otherwise, **do not ask the user for it**. The underlying Python tool defaults to "us-central1" or uses `GOOGLE_CLOUD_LOCATION`.
+
+3.  **`content` (string, required):**
+    *   **Source:** Refer to the "Detailed Instructions for `create_prompt` Parameters" section in `GEMINI.md` for how to source the `content` argument.
+
+4.  **`system_instruction` (string, required):**
+    *   **Source:** Refer to the "Detailed Instructions for `create_prompt` Parameters" section in `GEMINI.md` for how to source the `system_instruction` argument.
+
+5.  **`model` (string, required):**
+    *   **Source:** Refer to the "Detailed Instructions for `create_prompt` Parameters" section in `GEMINI.md` for how to source the `model` argument.
+
+6.  **`display_name` (string, optional):**
+    *   **Source:** Refer to the "Detailed Instructions for `create_prompt` Parameters" section in `GEMINI.md` for how to source the `display_name` argument.
+
+**Clarification Policy:**
+If any required information (`content`, `system_instruction`, `model`, or `display_name` when not already set) is missing or ambiguous based on the current context, you *must* ask the user for clarification before proceeding with the `create_prompt` call.
+"""

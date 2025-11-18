@@ -1,0 +1,47 @@
+[project]
+name = "vertex"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "google-cloud-aiplatform",
+    "google-generativeai",
+    "pydantic",
+    "absl-py",
+    "mcp[cli]>=1.21.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pyright",
+    "pytest"
+]
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "W",  # pycodestyle warnings
+    "I",  # isort
+    "UP", # pyupgrade
+    "D",  # pydocstyle
+    "N",  # pep8-naming
+    "PL", # Pylint
+]
+ignore = [
+    "D100", # Missing docstring in public module (module docstrings for tests are not required, and for others, can be added as needed)
+    "D101", # Missing docstring in public class (class docstrings are important, but for very simple classes, it might be deferred)
+    "D102", # Missing docstring in public method (methods with obvious purpose or trivial implementation might not need a docstring)
+    "D103", # Missing docstring in public function (functions with obvious purpose or trivial implementation might not need a docstring)
+    "D104", # Missing docstring in public package (similar to module docstrings)
+    "D105", # Missing docstring in magic method (magic methods like __init__ often have self-explanatory purposes)
+    "D107", # Missing docstring in public __init__ (explicitly for __init__, often self-explanatory)
+    "PLR0913", # Too many arguments in function definition (common for CLI tools)
+    "E501", # Line too long (auto-formatter not fixing for specific docstrings, and style guide allows exceptions)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
