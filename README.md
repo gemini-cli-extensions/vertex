@@ -60,7 +60,7 @@ For more detailed information on all available commands and their parameters, pl
 
 1.  **Clone the repository**:
     ```bash
-    git clone <github_url_of_this_repository>
+    git clone git@github.com:gemini-cli-extensions/vertex.git
     cd vertex
     ```
 
