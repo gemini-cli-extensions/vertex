@@ -13,7 +13,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: pytest
+        entry: uv run pytest
         language: python
         stages: [pre-push]
         types: [python]
