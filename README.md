@@ -103,6 +103,14 @@ To automatically fix formatting issues:
 uv run ruff format .
 ```
 
+### Testing
+
+To run the unit tests locally:
+
+```bash
+uv run python3 -m unittest discover
+```
+
 ### Continuous Integration
 
 This project uses GitHub Actions for CI. The workflow in `.github/workflows/ci.yml` automatically runs linting and type checking on every push and pull request.
