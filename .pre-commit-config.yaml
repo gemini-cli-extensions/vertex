@@ -15,5 +15,5 @@ repos:
         name: pytest
         entry: pytest
         language: python
-        stages: [push]
+        stages: [pre-push]
         types: [python]

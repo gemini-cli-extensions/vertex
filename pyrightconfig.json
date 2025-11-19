@@ -1,6 +1,7 @@
 {
   "include": [
-    "**/*.py"
+    "src",
+    "tests"
   ],
   "exclude": [
     "**/node_modules",
@@ -8,6 +9,8 @@
     "**/*.egg-info",
     ".venv"
   ],
+  "venvPath": ".",
+  "venv": ".venv",
   "reportMissingImports": true,
   "reportMissingTypeStubs": false
 }

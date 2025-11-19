@@ -3,7 +3,11 @@ from unittest.mock import MagicMock, patch
 
 from google.api_core import exceptions
 
-from tools import PromptDetails, VertexPromptManager, _build_prompt_details
+from src.vertex.tools import (
+    PromptDetails,
+    VertexPromptManager,
+    _build_prompt_details,
+)
 
 
 class TestVertexPromptManager(unittest.TestCase):
