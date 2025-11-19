@@ -14,7 +14,7 @@ class TestVertexPromptManager(unittest.TestCase):
         self.manager = VertexPromptManager()
         self.mock_client = MagicMock()
 
-    @patch("tools.Client")
+    @patch("vertex.tools.Client")
     def test_get_client(self, mock_client_constructor):
         mock_client_constructor.return_value = self.mock_client
         client = self.manager._get_client(
@@ -49,7 +49,7 @@ class TestVertexPromptManager(unittest.TestCase):
         )
         self.assertEqual(prompt_details.contents, "Hello World")
 
-    @patch("tools.Client")
+    @patch("vertex.tools.Client")
     def test_read_prompt_success(self, mock_client_constructor):
         mock_client_constructor.return_value = self.mock_client
         mock_prompt = MagicMock()
@@ -71,7 +71,7 @@ class TestVertexPromptManager(unittest.TestCase):
         self.assertEqual(prompt_details.prompt_id, "123")
         self.mock_client.prompts.get.assert_called_with(prompt_id="123")
 
-    @patch("tools.Client")
+    @patch("vertex.tools.Client")
     def test_read_prompt_not_found(self, mock_client_constructor):
         mock_client_constructor.return_value = self.mock_client
         self.mock_client.prompts.get.side_effect = exceptions.NotFound(
@@ -82,13 +82,13 @@ class TestVertexPromptManager(unittest.TestCase):
             self.manager.read_prompt(prompt_id="123", project_id="test-project")
         self.assertIn("Prompt 123 not found", str(context.exception))
 
-    @patch("tools.Client")
+    @patch("vertex.tools.Client")
     def test_delete_prompt_success(self, mock_client_constructor):
         mock_client_constructor.return_value = self.mock_client
         self.manager.delete_prompt(prompt_id="123", project_id="test-project")
         self.mock_client.prompts.delete.assert_called_with(prompt_id="123")
 
-    @patch("tools.Client")
+    @patch("vertex.tools.Client")
     def test_delete_prompt_not_found(self, mock_client_constructor):
         mock_client_constructor.return_value = self.mock_client
         self.mock_client.prompts.delete.side_effect = exceptions.NotFound(
