@@ -2,8 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from google.api_core import exceptions
-
-from src.vertex.tools import (
+from vertex.tools import (
     PromptDetails,
     VertexPromptManager,
     _build_prompt_details,
