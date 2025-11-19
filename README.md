@@ -12,7 +12,7 @@ This extension provides tools to manage prompts in Vertex AI directly from the G
 
 ## Prerequisites
 
-*   You have the [Gemini CLI](https://github.com/google/gemini-cli) installed.
+*   You have the [Gemini CLI](https://github.com/google-gemini/gemini-cli) installed.
 *   You have a Google Cloud project with the Vertex AI API enabled.
 *   You have authenticated with Google Cloud (e.g., by running `gcloud auth application-default login`).
 
