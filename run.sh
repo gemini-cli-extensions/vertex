@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Change to the directory containing this script.
+# Exit if the directory change fails.
+cd "$(dirname "${BASH_SOURCE[0]}")" || { echo "ERROR: Could not change to script directory." >&2; exit 1; }
+
 # Check if python3 is available
 if ! command -v python3 &> /dev/null
 then

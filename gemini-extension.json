@@ -1,9 +1,9 @@
 {
-  "name": "Vertex",
+  "name": "vertex",
   "version": "0.1.0",
   "mcpServers": {
     "VertexMcpServer": {
-      "command": "./run.sh",
+      "command": "${extensionPath}/run.sh",
       "args": []
     }
   }
