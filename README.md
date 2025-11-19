@@ -58,30 +58,19 @@ For more detailed information on all available commands and their parameters, pl
 
 ### Local Development Setup
 
-1.  **Clone the repository**:
-    ```bash
-    git clone git@github.com:gemini-cli-extensions/vertex.git
-    cd vertex
-    ```
+To set up your development environment, first make the setup script executable, then run it:
 
-2.  **Install `uv`** (a fast Python package installer):
-    ```bash
-    pip install uv
-    ```
+```bash
+chmod +x dev-setup.sh
+./dev-setup.sh
+```
 
-3.  **Create a virtual environment and install dependencies**:
-    ```bash
-    uv venv
-    source .venv/bin/activate
-    uv pip install -e ".[dev]"
-    ```
+After running the script, activate your virtual environment:
 
-4.  **Link your local version for testing**:
-    Use the `gemini extension link` command to symlink your local `extension` directory to the Gemini CLI's extensions folder. This allows you to test your changes live.
-    ```bash
-    gemini extension link .
-    ```
-    You may need to restart the Gemini CLI for the changes to take effect.
+```bash
+source .venv/bin/activate
+```
+
 
 ### Code Quality
 
@@ -110,6 +99,13 @@ To run the unit tests locally:
 ```bash
 uv run python3 -m unittest discover
 ```
+
+### Pre-commit Hooks
+
+This project uses `pre-commit` to enforce code quality checks automatically before commits and pushes. The `dev-setup.sh` script automatically installs these hooks for you.
+
+*   **On `git commit`**: `ruff` (linting and formatting) and `pyright` (static type checking) will run.
+*   **On `git push`**: `pytest` will run to execute the test suite.
 
 ### Continuous Integration
 
