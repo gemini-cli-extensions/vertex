@@ -1,4 +1,4 @@
-# Vertex Extension
+# Vertex Prompt Management Extension
 
 This extension provides tools to manage prompts in Vertex AI.
 
@@ -6,9 +6,9 @@ Whenever anyone wants to read or write vertex prompts, you must use the vertex
 management tools.
 
 The available tools are: - `create_prompt`: To save or create new prompts. -
-`read_prompt`: To retrieve existing prompts by ID. - `update_prompt`: To modify
-existing prompts. - `delete_prompt`: To remove prompts. - `list_prompts`: To
-search and list prompts, useful for finding IDs.
+`read_prompt`: To retrieve existing prompts by ID or display name. -
+`update_prompt`: To modify existing prompts. - `delete_prompt`: To remove
+prompts. - `list_prompts`: To search and list prompts, useful for finding IDs.
 
 ## Detailed Instructions for `create_prompt` Parameters:
 
@@ -93,6 +93,101 @@ arguments are sourced:
     model="gemini-2.5-flash", display_name="create test"))` *(Again,
     `system_instruction` is omitted. The Gemini CLI will check for and use
     content from `./GEMINI.md` if it exists.)*
+
+## read_prompt workflow
+
+This workflow describes how to retrieve an existing prompt from Vertex AI using
+`tools.read_prompt` and potentially `tools.list_prompts`.
+
+1.  **Identifying the Prompt (`prompt_id` or `display_name`):**
+
+    *   **By `prompt_id`:** If the user provides a specific `prompt_id` (e.g.,
+        "read prompt id some-unique-id"), call
+        `tools.read_prompt(prompt_id='some-unique-id')`. The result of this call
+        will be the prompt object to be applied.
+
+    *   **By `display_name`:** If the user provides a `display_name` but NOT a
+        `prompt_id` (e.g., "read prompt 'My Custom Prompt'"):
+
+        1.  **Agent Action:** Call `tools.list_prompts(display_name='[provided
+            display name]')`.
+        2.  **Agent Response:**
+            *   **One Match:** If `list_prompts` returns exactly one prompt, use
+                this prompt object directly. There is **no need** to call
+                `tools.read_prompt` with the ID again, as all necessary
+                information (`content`, `system_instruction`) is available in
+                the `list_prompts` result.
+            *   **Multiple Matches:** If `list_prompts` returns multiple
+                prompts, list the prompt for each match (showing `id` and
+                `display_name`) and ask the user to clarify which `prompt_id`
+                they intend to read. Once the user provides a specific `id`
+                (e.g., "id id2"), the agent should:
+                1.  Search through the list of prompts previously returned by
+                    `tools.list_prompts`.
+                2.  Select the prompt object whose `id` matches the user's
+                    input. There is **no need** to call `tools.read_prompt`
+                    again, as all necessary information is already available in
+                    the `list_prompts` result.
+            *   **No Matches:** Inform the user that no prompts were found with
+                that display name and that the read cannot proceed.
+
+2.  **Applying the Retrieved Prompt:** Once a single prompt object has been
+    identified (either directly from `tools.read_prompt` when using `prompt_id`,
+    or from a unique/filtered match in `tools.list_prompts` when using
+    `display_name`):
+
+    *   **Update `GEMINI.md` with System Instruction:** The `system_instruction`
+        field from the retrieved prompt will completely **override** the
+        contents of the `GEMINI.md` file in the current working directory.
+
+        *   If `GEMINI.md` does not exist, it will be created.
+        *   This is equivalent to writing the `system_instruction` to
+            `GEMINI.md`.
+
+    *   **Memory Refresh:** To ensure the Gemini CLI uses the newly loaded
+        `system_instruction` from the updated `GEMINI.md`, memory refresh should
+        be triggered
+
+    *   **Run the prompt:** The `content` field from the retrieved prompt will
+        be used to run as new prompt
+
+**Example Interactions for `read_prompt`:**
+
+*   **Read by ID:** User: `read prompt id my-prompt-123`
+
+    *   Generated Call: `print(tools.read_prompt(prompt_id='my-prompt-123'))`
+    *   *Result:* `GEMINI.md` is updated with the system instruction from
+        `my-prompt-123`, you should call `/memory refresh` for user, and get
+        response from the new prompt.
+
+*   **Read by Display Name (Unique Match):** User: `read prompt 'My Analysis
+    Prompt'`
+
+    1.  Agent calls: `print(tools.list_prompts(display_name='My Analysis
+        Prompt'))`
+    2.  (Assuming this returns `[{'id': 'id456', 'display_name': 'My Analysis
+        Prompt', 'content': 'Analysis content...', 'system_instruction':
+        'Analysis SI...', ...}]`)
+    3.  **Agent directly uses the content and system instruction from this list
+        result.**
+    4.  *Result:* `GEMINI.md` is updated with "Analysis SI...", you should call
+        `/memory refresh` for user, and get response from the new prompt.
+
+*   **Read by Display Name (Multiple Matches):** User: `read prompt 'Generic
+    Helper'`
+
+    1.  Agent calls: `print(tools.list_prompts(display_name='Generic Helper'))`
+    2.  (Assuming this returns `[{'id': 'id1', 'content': 'Content 1',
+        'system_instruction': 'SI 1', ...}, {'id': 'id2', 'content': 'Content
+        2', 'system_instruction': 'SI 2', ...}]`)
+    3.  Agent responds: "Multiple prompts found with display name 'Generic
+        Helper'. Please specify by ID. Found IDs: id1, id2."
+    4.  User: `id id2`
+    5.  **Agent filters the results from step 2, finds the prompt with
+        `id='id2'`, and uses its content and system instruction.**
+        *   *(No new call to `tools.read_prompt` is made here.)*
+    6.  *Result:* `GEMINI.md` is updated with "SI 2", you should call `/memory
+        refresh` for user, and get response from the new prompt.
 
 ## Detailed Instructions for `update_prompt` Parameters:
 

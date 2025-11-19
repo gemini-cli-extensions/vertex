@@ -41,7 +41,7 @@ def _build_contents(text: str, role: str) -> list[genai_types.Content]:
     return [_build_content(text, role)]
 
 
-def _format_prompt_to_dict(prompt: vertexai_types.Prompt) -> PromptDetails:
+def _build_prompt_details(prompt: vertexai_types.Prompt) -> PromptDetails:
     """Helper function to format a single Prompt object into a dictionary."""
     if not prompt:
         raise ValueError("Prompt is None. Cannot format to PromptDetails.")
@@ -102,8 +102,7 @@ class VertexPromptManager:
         if not final_project_id:
             raise ValueError(
                 "Error: Google Cloud Project ID is required. Please set the "
-                "GOOGLE_CLOUD_PROJECT environment variable or provide "
-                "'project_id' "
+                "GOOGLE_CLOUD_PROJECT environment variable or provide 'project_id' "
                 "in your Gemini CLI command."
             )
         final_location_id = (
@@ -125,11 +124,8 @@ class VertexPromptManager:
         location_id: str | None = None,
     ) -> vertexai_types.Prompt:
         """Get the prompt content with given prompt id."""
-        client = self._get_client(project_id, location_id)
-        try:
-            return client.prompts.get(prompt_id=prompt_id)
-        except exceptions.NotFound as e:
-            raise ValueError(f"Prompt {prompt_id} not found.") from e
+        prompt = self._get_prompt(prompt_id, project_id, location_id)
+        return _build_prompt_details(prompt)
 
     def create_prompt(
         self,
@@ -139,7 +135,7 @@ class VertexPromptManager:
         display_name: str,
         project_id: str | None = None,
         location_id: str | None = None,
-    ) -> vertexai_types.Prompt:
+    ) -> PromptDetails:
         """Create a prompt with given content, system instruction, model and display name."""
         client = self._get_client(project_id, location_id)
         contents = _build_contents(content, "user")
@@ -157,16 +153,15 @@ class VertexPromptManager:
                     si = system_instruction[0]
                 else:
                     raise TypeError(
-                        "If system_instruction is a list, it must contain "
-                        "exactly one genai_types.Content object."
+                        "If system_instruction is a list, it must contain exactly one"
+                        " genai_types.Content object."
                     )
             else:
                 raise TypeError(
-                    "system_instruction must be str, "
-                    "list[genai_types.Content], "
-                    f"or None, but got "
-                    f"{type(system_instruction).__name__}"
+                    "system_instruction must be str, list[genai_types.Content], or"
+                    f" None, but got {type(system_instruction).__name__}"
                 )
+
         # Convert si to a dictionary using .dict() if it exists,
         # as the PromptData likely expects a dictionary for system_instruction.
         si_dict = si.dict() if si else None
@@ -190,7 +185,9 @@ class VertexPromptManager:
             prompt_display_name=display_name
         )
 
-        return client.prompts.create(prompt=prompt, config=create_config)
+        return _build_prompt_details(
+            client.prompts.create(prompt=prompt, config=create_config)
+        )
 
     # TODO(b/455906163): Add support for updating display name of a prompt.
     def update_prompt(
@@ -201,23 +198,27 @@ class VertexPromptManager:
         content: str | None = None,
         system_instruction: str | None = None,
         model: str | None = None,
-    ) -> vertexai_types.Prompt:
+    ) -> PromptDetails:
         """Update a prompt with given prompt_id and new content, system instruction, model."""
         client = self._get_client(project_id, location_id)
-        prompt = self.read_prompt(
+        prompt = self._get_prompt(
             prompt_id, project_id, location_id
         )  # Pass project_id/location_id
 
         if content is not None:
             prompt.prompt_data.contents = _build_contents(content, "user")
         if system_instruction is not None:
-            prompt.prompt_data.system_instruction = system_instruction
+            prompt.prompt_data.system_instruction = _build_content(
+                system_instruction, "system"
+            )
         if model is not None:
             prompt.prompt_data.model = model
 
         try:
-            return client.prompts.create_version(  # Use local client
-                prompt=prompt, prompt_id=prompt_id
+            return _build_prompt_details(
+                client.prompts.create_version(
+                    prompt=prompt, prompt_id=prompt_id
+                )
             )
         except Exception as e:
             raise ValueError(f"Failed to update prompt {prompt_id}.") from e
@@ -255,8 +256,21 @@ class VertexPromptManager:
 
         prompt_refs = client.prompts.list(config=list_config)
         prompts = [
-            self.read_prompt(prompt_id=ref.prompt_id) for ref in prompt_refs
+            self._get_prompt(prompt_id=ref.prompt_id) for ref in prompt_refs
         ]
         valid_prompts = [p for p in prompts if p is not None]
-        formatted_prompts = [_format_prompt_to_dict(p) for p in valid_prompts]
+        formatted_prompts = [_build_prompt_details(p) for p in valid_prompts]
         return formatted_prompts
+
+    def _get_prompt(
+        self,
+        prompt_id: str,
+        project_id: str | None = None,
+        location_id: str | None = None,
+    ) -> vertexai_types.Prompt:
+        """Get the prompt content with given prompt id."""
+        client = self._get_client(project_id, location_id)
+        try:
+            return client.prompts.get(prompt_id=prompt_id)
+        except exceptions.NotFound as e:
+            raise ValueError(f"Prompt {prompt_id} not found.") from e
