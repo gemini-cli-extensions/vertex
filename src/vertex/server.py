@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from absl import app
 from mcp.server import fastmcp
 
-import tools
+from . import tools
 
 
 def main(argv: Sequence[str]) -> None:
