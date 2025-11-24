@@ -49,7 +49,10 @@ class TestVertexPromptManager(unittest.TestCase):
         )
         self.assertEqual(prompt_details.contents, "Hello World")
 
-    @patch("vertex.tools.Client")
+    @# The `@patch("vertex.tools.Client")` decorator in the commented-out test
+    # method `test_read_prompt_success` is used to mock the `Client` class from
+    # the `vertex.tools` module during the test execution.
+    patch("vertex.tools.Client")
     def test_read_prompt_success(self, mock_client_constructor):
         mock_client_constructor.return_value = self.mock_client
         mock_prompt = MagicMock()
