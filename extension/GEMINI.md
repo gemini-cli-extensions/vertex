@@ -131,33 +131,13 @@ This workflow describes how to retrieve an existing prompt from Vertex AI using
             *   **No Matches:** Inform the user that no prompts were found with
                 that display name and that the read cannot proceed.
 
-2.  **Applying the Retrieved Prompt:** Once a single prompt object has been
-    identified (either directly from `tools.read_prompt` when using `prompt_id`,
-    or from a unique/filtered match in `tools.list_prompts` when using
-    `display_name`):
-
-    *   **Update `GEMINI.md` with System Instruction:** The `system_instruction`
-        field from the retrieved prompt will completely **override** the
-        contents of the `GEMINI.md` file in the current working directory.
-
-        *   If `GEMINI.md` does not exist, it will be created.
-        *   This is equivalent to writing the `system_instruction` to
-            `GEMINI.md`.
-
-    *   **Memory Refresh:** To ensure the Gemini CLI uses the newly loaded
-        `system_instruction` from the updated `GEMINI.md`, memory refresh should
-        be triggered
-
-    *   **Run the prompt:** The `content` field from the retrieved prompt will
-        be used to run as new prompt
 
 **Example Interactions for `read_prompt`:**
 
 *   **Read by ID:** User: `read prompt id my-prompt-123`
 
     *   Generated Call: `print(tools.read_prompt(prompt_id='my-prompt-123'))`
-    *   *Result:* `GEMINI.md` is updated with the system instruction from
-        `my-prompt-123`, you should call `/memory refresh` for user, and get
+    *   *Result:* get
         response from the new prompt.
 
 *   **Read by Display Name (Unique Match):** User: `read prompt 'My Analysis
@@ -170,8 +150,7 @@ This workflow describes how to retrieve an existing prompt from Vertex AI using
         'Analysis SI...', ...}]`)
     3.  **Agent directly uses the content and system instruction from this list
         result.**
-    4.  *Result:* `GEMINI.md` is updated with "Analysis SI...", you should call
-        `/memory refresh` for user, and get response from the new prompt.
+    4.  *Result:* get response from the new prompt.
 
 *   **Read by Display Name (Multiple Matches):** User: `read prompt 'Generic
     Helper'`
@@ -186,8 +165,7 @@ This workflow describes how to retrieve an existing prompt from Vertex AI using
     5.  **Agent filters the results from step 2, finds the prompt with
         `id='id2'`, and uses its content and system instruction.**
         *   *(No new call to `tools.read_prompt` is made here.)*
-    6.  *Result:* `GEMINI.md` is updated with "SI 2", you should call `/memory
-        refresh` for user, and get response from the new prompt.
+    6.  *Result:* get response from the new prompt.
 
 ## Detailed Instructions for `update_prompt` Parameters:
 

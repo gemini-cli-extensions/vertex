@@ -122,10 +122,10 @@ class VertexPromptManager:
         prompt_id: str,
         project_id: str | None = None,
         location_id: str | None = None,
-    ) -> vertexai_types.Prompt:
+    ) -> str:
         """Get the prompt content with given prompt id."""
         prompt = self._get_prompt(prompt_id, project_id, location_id)
-        return _build_prompt_details(prompt)
+        return _build_prompt_details(prompt).contents
 
     def create_prompt(
         self,
