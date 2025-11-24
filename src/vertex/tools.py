@@ -16,9 +16,6 @@ class PromptDetails(_common.BaseModel):
     """Class for holding prompt details."""
 
     prompt_id: str = pydantic.Field(..., description="The ID of the prompt.")
-    model: str = pydantic.Field(
-        ..., description="The model associated with the prompt."
-    )
     display_name: str = pydantic.Field(
         ..., description="The display name of the prompt."
     )
@@ -47,7 +44,6 @@ def _build_prompt_details(prompt: vertexai_types.Prompt) -> PromptDetails:
         raise ValueError("Prompt is None. Cannot format to PromptDetails.")
 
     prompt_data = getattr(prompt, "prompt_data", None)
-    model = getattr(prompt_data, "model", "N/A") if prompt_data else "N/A"
     display_name = prompt.dataset.display_name or "N/A"
 
     system_instruction_text = ""
@@ -72,7 +68,6 @@ def _build_prompt_details(prompt: vertexai_types.Prompt) -> PromptDetails:
 
     return PromptDetails(
         prompt_id=prompt.prompt_id,
-        model=model,
         display_name=display_name,
         system_instruction=system_instruction_text,
         contents=contents_combined,
@@ -122,7 +117,7 @@ class VertexPromptManager:
         prompt_id: str,
         project_id: str | None = None,
         location_id: str | None = None,
-    ) -> vertexai_types.Prompt:
+    ) -> PromptDetails:
         """Get the prompt content with given prompt id."""
         prompt = self._get_prompt(prompt_id, project_id, location_id)
         return _build_prompt_details(prompt)
