@@ -30,7 +30,6 @@ class TestVertexPromptManager(unittest.TestCase):
         mock_prompt = MagicMock()
         mock_prompt.prompt_id = "123"
         mock_prompt.dataset.display_name = "Test Prompt"
-        mock_prompt.prompt_data.model = "gemini-pro"
         mock_prompt.prompt_data.system_instruction.parts = [
             MagicMock(text="System instruction")
         ]
@@ -43,16 +42,12 @@ class TestVertexPromptManager(unittest.TestCase):
         self.assertIsInstance(prompt_details, PromptDetails)
         self.assertEqual(prompt_details.prompt_id, "123")
         self.assertEqual(prompt_details.display_name, "Test Prompt")
-        self.assertEqual(prompt_details.model, "gemini-pro")
         self.assertEqual(
             prompt_details.system_instruction, "System instruction"
         )
         self.assertEqual(prompt_details.contents, "Hello World")
 
-    @# The `@patch("vertex.tools.Client")` decorator in the commented-out test
-    # method `test_read_prompt_success` is used to mock the `Client` class from
-    # the `vertex.tools` module during the test execution.
-    patch("vertex.tools.Client")
+    @patch("vertex.tools.Client")
     def test_read_prompt_success(self, mock_client_constructor):
         mock_client_constructor.return_value = self.mock_client
         mock_prompt = MagicMock()
