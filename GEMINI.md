@@ -41,7 +41,7 @@ arguments are sourced:
    - **Default Behavior:** If the user does NOT explicitly provide a system
      instruction in their current prompt:
      - The Gemini CLI will check for a file named `GEMINI.md` _only_ in the
-       **current working directory**.
+       **current working directory** exclude children directories.
      - If `GEMINI.md` exists in the current working directory, its entire
        content will be loaded by the Gemini CLI and used as the
        `system_instruction` when calling `tools.create_prompt`.
@@ -203,7 +203,7 @@ When using `tools.update_prompt`, the following arguments are sourced. Note that
    - **Default Behavior:** If the user does NOT explicitly provide a system
      instruction:
      - The Gemini CLI will check for a file named `GEMINI.md` _only_ in the
-       **current working directory**.
+       **current working directory** exclude children directories.
      - If `GEMINI.md` exists, its entire content will be loaded and used as the
        `system_instruction` for `tools.update_prompt`.
      - If no `GEMINI.md` file is found, the `system_instruction` argument should
