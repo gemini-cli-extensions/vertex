@@ -13,7 +13,7 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: uv run pytest
-        language: python
+        entry: bash -c 'PYTHONPATH=./src uv run pytest'
+        language: system
         stages: [pre-push]
         types: [python]

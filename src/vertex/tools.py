@@ -1,5 +1,6 @@
 """Module for defining tools for Vertex AI Prompt management."""
 
+import itertools
 import os
 
 import pydantic
@@ -10,6 +11,7 @@ from vertexai import types as vertexai_types
 from vertexai._genai import Client
 
 _DEFAULT_LOCATION = "us-central1"
+_MAX_PREVIEW_LENGTH = 100  # Define the maximum length for preview
 
 
 class PromptDetails(_common.BaseModel):
@@ -38,7 +40,16 @@ def _build_contents(text: str, role: str) -> list[genai_types.Content]:
     return [_build_content(text, role)]
 
 
-def _build_prompt_details(prompt: vertexai_types.Prompt) -> PromptDetails:
+def _truncate_text(text: str, max_length: int) -> str:
+    """Truncates text to max_length and appends an ellipsis if truncated."""
+    if len(text) > max_length:
+        return text[:max_length] + "..."
+    return text
+
+
+def _build_prompt_details(
+    prompt: vertexai_types.Prompt, truncate_texts: bool = False
+) -> PromptDetails:
     """Helper function to format a single Prompt object into a dictionary."""
     if not prompt:
         raise ValueError("Prompt is None. Cannot format to PromptDetails.")
@@ -48,23 +59,38 @@ def _build_prompt_details(prompt: vertexai_types.Prompt) -> PromptDetails:
 
     system_instruction_text = ""
     if prompt_data and prompt_data.system_instruction:
-        si_parts = [
-            part.text
-            for part in prompt_data.system_instruction.parts
-            if hasattr(part, "text")
-        ]
-        system_instruction_text = "".join(si_parts)
+        si_parts = getattr(prompt_data.system_instruction, "parts", None)
+        if si_parts is not None:
+            system_instruction_text = "".join(
+                part.text
+                for part in si_parts
+                if hasattr(part, "text") and part.text is not None
+            )
+    if truncate_texts:
+        system_instruction_text = _truncate_text(
+            system_instruction_text, _MAX_PREVIEW_LENGTH
+        )
 
     contents_combined = ""
     if prompt_data and prompt_data.contents:
         all_content_texts = []
         for content in prompt_data.contents:
-            content_parts = [
-                part.text for part in content.parts if hasattr(part, "text")
-            ]
-            if content_parts:
-                all_content_texts.append("".join(content_parts))
+            if content:
+                content_parts = getattr(content, "parts", None)
+                if content_parts is not None:
+                    part_texts = [
+                        part.text
+                        for part in content_parts
+                        if hasattr(part, "text") and part.text is not None
+                    ]
+                    if part_texts:
+                        all_content_texts.append("".join(part_texts))
+
         contents_combined = "".join(all_content_texts)
+    if truncate_texts:
+        contents_combined = _truncate_text(
+            contents_combined, _MAX_PREVIEW_LENGTH
+        )
 
     return PromptDetails(
         prompt_id=prompt.prompt_id,
@@ -249,12 +275,16 @@ class VertexPromptManager:
             filter=filter_str, page_size=page_size
         )
 
-        prompt_refs = client.prompts.list(config=list_config)
+        raw_prompt_refs = client.prompts.list(config=list_config)
+        prompt_refs = list(itertools.islice(raw_prompt_refs, page_size))
         prompts = [
             self._get_prompt(prompt_id=ref.prompt_id) for ref in prompt_refs
         ]
         valid_prompts = [p for p in prompts if p is not None]
-        formatted_prompts = [_build_prompt_details(p) for p in valid_prompts]
+        formatted_prompts = [
+            _build_prompt_details(prompt=p, truncate_texts=True)
+            for p in valid_prompts
+        ]
         return formatted_prompts
 
     def _get_prompt(
