@@ -18,7 +18,7 @@ then
     echo "'uv' is not found. Attempting to install it using the official installer..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
     # Add the default installation directory to the PATH for this script's execution
-    export PATH="$HOME/.cargo/bin:$PATH"
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # Final check for uv
