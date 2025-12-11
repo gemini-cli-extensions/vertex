@@ -61,8 +61,7 @@ For more detailed information on all available commands and their parameters, pl
 To set up your development environment, first make the setup script executable, then run it:
 
 ```bash
-chmod +x dev-setup.sh
-./dev-setup.sh
+sh ./dev-setup.sh
 ```
 
 After running the script, activate your virtual environment:

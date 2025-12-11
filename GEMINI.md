@@ -254,3 +254,10 @@ When using `tools.update_prompt`, the following arguments are sourced. Note that
   _(Here, `content` is from the last user message. Since no `system_instruction`
   was provided, the Gemini CLI will check for and use content from `./GEMINI.md`
   if it exists.)_
+
+## General Error Handling
+
+If any tool call fails with an error indicating a project permission issue (e.g., "Permission denied on project 'project-id'"), you must:
+1.  Inform the user about the permission error.
+2.  Ask the user to provide a valid project ID.
+3.  Retry the original tool call, adding the `project_id` parameter with the user-provided value.
