@@ -296,11 +296,13 @@ class VertexPromptManager:
 
     def _get_prompt(
         self,
-        prompt_id: str,
+        prompt_id: str | None = None,
         project_id: str | None = None,
         location_id: str | None = None,
     ) -> vertexai_types.Prompt:
         """Get the prompt content with given prompt id."""
+        if not prompt_id:
+            raise ValueError("Prompt ID is required.")
         client = self._get_client(project_id, location_id)
         try:
             return client.prompts.get(prompt_id=prompt_id)
