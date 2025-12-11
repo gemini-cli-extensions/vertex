@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -23,6 +24,15 @@ class TestVertexPromptManager(unittest.TestCase):
         self.assertEqual(client, self.mock_client)
         mock_client_constructor.assert_called_with(
             project="test-project", location="test-location"
+        )
+
+    @patch.dict(os.environ, {"GOOGLE_CLOUD_PROJECT": "cloudshell-gca"})
+    def test_get_client_cloudshell_project(self):
+        with self.assertRaises(ValueError) as context:
+            self.manager._get_client()
+        self.assertIn(
+            "You are running in a default Google Cloud Shell project.",
+            str(context.exception),
         )
 
     def test_build_prompt_details(self):

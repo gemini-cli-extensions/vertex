@@ -120,6 +120,13 @@ class VertexPromptManager:
             or os.environ.get("GOOGLE_CLOUD_PROJECT")
         )
 
+        if final_project_id == "cloudshell-gca":
+            raise ValueError(
+                "You are running in a default Google Cloud Shell project. "
+                "Please set your own project by modifying the "
+                "GOOGLE_CLOUD_PROJECT in ~/.gemini/.env."
+            )
+
         if not final_project_id:
             raise ValueError(
                 "Error: Google Cloud Project ID is required. Please set the "
