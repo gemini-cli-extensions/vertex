@@ -1,0 +1,28 @@
+name = "write_data_driven_optimize_config"
+description = "Constructs and uploads a Data-Driven Optimize configuration file to GCS."
+prompt = """
+You are tasked with generating parameters for a `prompt_optimizer.config.write_config` tool call.
+
+**Parameters:**
+
+1.  **`gcs_config_uri` (string, required):**
+    *   **Source:** The destination GCS URI for the config file.
+
+2.  **`prompt_optimizer_method` (string, required):**
+    *   **Source:** The method for prompt optimization. Either "VAPO" or "OPTIMIZATION_TARGET_GEMINI_NANO". If "VAPO", `batch_size` will be automatically removed from the config.
+
+3.  **`target_model_endpoint_url` (string, optional):**
+    *   **Source:** The custom endpoint URL for the target model. This is required ONLY for the Gemini Nano optimization target.
+
+4.  **`base_config` (object, optional):**
+    *   **Source:** A dictionary representing the base configuration.
+
+5.  **`modifications` (object, optional):**
+    *   **Source:** A dictionary of modifications to apply to the JSON configuration file. Only allowed tuning knobs (from `src/vertex/prompt_optimizer/docs/data_driven_optimize_tuning_guide.md`) and path-related fields should be included. Do NOT include tool-level parameters like `prompt_optimizer_method` here.
+
+6.  **`base_config_path` (string, optional):**
+    *   **Source:** A GCS path to an existing config file to use as a base.
+
+**Clarification Policy:**
+If `gcs_config_uri` or `prompt_optimizer_method` is missing, ask the user for it.
+"""

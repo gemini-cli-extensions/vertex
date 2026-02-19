@@ -1,14 +1,21 @@
 [project]
 name = "vertex"
-version = "0.1.0"
+version = "0.2.0"
 requires-python = ">=3.10"
 dependencies = [
-    "google-cloud-aiplatform",
+    "google-cloud-aiplatform>=1.138.0",
     "google-generativeai",
     "pydantic",
     "absl-py",
     "mcp[cli]>=1.21.2",
+    "google-cloud-storage",
+    "pandas",
+    "matplotlib",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
 dev = ["ruff~=0.5.5", "pyright", "pytest", "ipython", "pre-commit"]

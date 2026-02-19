@@ -278,7 +278,8 @@ class VertexPromptManager:
         raw_prompt_refs = client.prompts.list(config=list_config)
         prompt_refs = list(itertools.islice(raw_prompt_refs, page_size))
         prompts = [
-            self._get_prompt(prompt_id=ref.prompt_id) for ref in prompt_refs
+            self._get_prompt(prompt_id=ref.prompt_id or "")
+            for ref in prompt_refs
         ]
         valid_prompts = [p for p in prompts if p is not None]
         formatted_prompts = [

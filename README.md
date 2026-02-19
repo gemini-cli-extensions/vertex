@@ -1,14 +1,21 @@
 # Vertex AI Gemini CLI Extension
 
-This extension provides tools to manage prompts in Vertex AI directly from the Gemini CLI. It allows you to create, read, update, list, and delete prompts, making it easier to integrate prompt management into your development workflow.
+This extension provides tools to manage prompts and work with data-driven prompt optimizer in Vertex AI directly from the Gemini CLI. It allows you to create, read, update, list, and delete prompts, making it easier to integrate prompt management into your development workflow.
 
 ## Features
 
+### Prompt Management
 *   **Create Prompt**: Save new prompts with specified content, system instructions, model, and display name.
 *   **Read Prompt**: Retrieve existing prompts by their ID.
 *   **Update Prompt**: Modify the content, system instructions, or model of an existing prompt.
 *   **Delete Prompt**: Remove prompts using their ID.
 *   **List Prompts**: Search and list prompts, useful for finding prompt IDs based on display names.
+
+### Data-Driven Prompt Optimizer
+*   **Configuration Generation**: Create the input configurations required to run data-driven prompt optimizer.
+*   **Job Execution**: Run large-scale prompt optimization jobs directly on Vertex AI.
+*   **Results Analysis**: Perform deep-dive analysis of optimization results, including learning curves and candidate comparisons.
+*   **Automated Reporting**: Generate comprehensive HTML reports with tuning suggestions for subsequent runs.
 
 ## Prerequisites
 
@@ -33,6 +40,8 @@ export GOOGLE_CLOUD_LOCATION="us-central1"
 
 ## Usage
 
+### Prompt Management Examples
+
 Once installed and configured, you can use the Vertex AI prompt management tools by passing natural language commands to the Gemini CLI.
 
 Here are a few examples:
@@ -53,6 +62,25 @@ Here are a few examples:
     ```
 
 For more detailed information on all available commands and their parameters, please refer to the `extension/commands` files.
+
+### Prompt Optimizer Examples
+
+*   **Analyze optimization results**:
+    ```bash
+    gemini "analyze my data drive prompt optimizer results at gs://your-bucket/optimization-run-1/"
+    ```
+
+*   **Configure a new optimization job**:
+    ```bash
+    gemini "help me configure a new optimization job based on my existing config at gs://your-bucket/config.json"
+    ```
+
+*   **Run optimization job**:
+    ```bash
+    gemini "start a data driven prompt optimizer job using my config at gs://your-bucket/config-new.json"
+    ```
+
+For more detailed information on all available commands and workflows, please refer to the `GEMINI.md` file in this repository.
 
 ## Development
 
