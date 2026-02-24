@@ -1,0 +1,21 @@
+name = "analyze_data_driven_optimize_results"
+description = "Analyzes the output of a Data-Driven Optimize job and saves the results."
+prompt = """
+You are tasked with generating parameters for a `prompt_optimizer.analyzer.analyze_results` tool call.
+
+**Parameters:**
+
+1.  **`output_path` (string, required):**
+    *   **Source:** The GCS, Google Drive, or local path containing the job results. This is usually provided by the user.
+
+2.  **`analysis_data_path` (string, optional):**
+    *   **Default:** "analysis_data.json"
+    *   **Source:** The local path where the analysis metadata will be saved.
+
+3.  **`top_n_prompts` (integer, optional):**
+    *   **Default:** 10
+    *   **Source:** The number of top-performing prompts to include in the analysis.
+
+**Workflow Integration:**
+Refer to the "Analysis and Suggestions" workflow in `GEMINI.md`. This tool is the first step in a chain that includes formulating suggestions and generating an HTML report.
+"""

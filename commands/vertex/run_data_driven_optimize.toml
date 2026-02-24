@@ -1,0 +1,23 @@
+name = "run_data_driven_optimize"
+description = "Starts a data-driven prompt optimization job on Vertex AI."
+prompt = """
+You are tasked with generating parameters for a `run_data_driven_optimize` tool call.
+
+**Parameters:**
+
+1.  **`config_gcs_path` (string, required):**
+    *   **Source:** The GCS URI to the configuration JSON file.
+
+2.  **`service_account` (string, required):**
+    *   **Source:** The service account email to run the job (typically `{project_number}-compute@developer.gserviceaccount.com`). Ask the user if not known.
+
+3.  **`prompt_optimizer_method` (string, required):**
+    *   **Source:** The method for prompt optimization. Either "VAPO" or "OPTIMIZATION_TARGET_GEMINI_NANO".
+
+4.  **`wait_for_completion` (boolean, optional):**
+    *   **Default:** false
+    *   **Source:** Whether to block until the job completes.
+
+**Clarification Policy:**
+If `config_gcs_path`, `service_account` or `prompt_optimizer_method` is missing, ask the user for it.
+"""

@@ -1,17 +1,28 @@
-# Vertex Prompt Management Extension
+# Vertex AI Gemini CLI Extension
 
-This extension provides tools to manage prompts in Vertex AI.
+This extension provides tools to manage prompts and use the data-driven prompt
+optimization in Vertex AI directly from the Gemini CLI.
 
-Whenever anyone wants to read or write vertex prompts, you must use the vertex
-management tools.
+## Available Tools
 
-The available tools are:
-
+### Prompt Management Tools
 - `create_prompt`: To save or create new prompts.
 - `read_prompt`: To retrieve existing prompts by ID or display name.
 - `update_prompt`: To modify existing prompts.
 - `delete_prompt`: To remove prompts.
 - `list_prompts`: To search and list prompts, useful for finding IDs.
+
+### Data-Driven Optimization Tools
+- `run_data_driven_optimize`: Starts a data-driven prompt optimization job on
+  Vertex AI using a configuration file stored in GCS.
+- `analyze_data_driven_optimize_results`: Analyzes the output of a Data-Driven
+  Optimize job to identify trends and best-performing candidates.
+- `generate_html_report`: Generates a comprehensive HTML report with
+  visualizations to help you understand optimization performance.
+- `write_data_driven_optimize_config`: Constructs and uploads a new JSON
+  configuration for optimization jobs, incorporating suggested tuning parameters.
+
+---
 
 ## Detailed Instructions for `create_prompt` Parameters
 
@@ -261,3 +272,154 @@ If any tool call fails with an error indicating a project permission issue (e.g.
 1.  Inform the user about the permission error.
 2.  Ask the user to provide a valid project ID.
 3.  Retry the original tool call, adding the `project_id` parameter with the user-provided value.
+
+---
+
+## Data-Driven Prompt Optimizer Overall Guide
+
+For a general understanding of Data-Driven Prompt Optimizer and its
+capabilities, please
+refer to the Data-Driven Optimize Overall Guide:
+
+@./src/vertex/prompt_optimizer/docs/data_driven_optimize_overall_guide.md
+
+## Optimization Tool Details
+
+The extension provides a suite of tools to parse and analyze the output of a
+Data-Driven Prompt Optimizer job. The `output_path` for these tools stores
+the outputs
+of a run and can be a GCS path or a local directory. While the Data-Driven
+Optimize job currently only outputs to GCS, results can be copied to the local
+file system for analysis.
+
+1.  `analyze_data_driven_optimize_results(output_path: str, top_n_prompts:
+    int = 10, analysis_data_path: str = None)`: Analyzes results and
+    returns a JSON object containing the analysis data summary. If
+    `analysis_data_path` is provided, it saves the results into three separate
+    files to avoid size limits and returns a **minimal summary** with
+    file paths
+    and the best prompt score. The three files are:
+    -   `{analysis_data_path}`: Core metadata (config, comparison, best
+    prompt).
+    -   `*_metrics.json`: Detailed metrics for all candidates (no prompt text).
+    -   `*_prompts.json`: Mapping of top candidates' keys to full prompt texts.
+
+2.  `generate_html_report(analysis_data: Dict[str, Any] =
+    None, report_path: str = "data_driven_optimize_analysis_report.html",
+    suggested_config_data: Dict[str, Any] = None, top_n_prompts: int = 10,
+    analysis_data_path: str = None)`: Generates a comprehensive HTML report. If
+    `analysis_data_path` is provided, it automatically loads and re-joins the
+    metadata, metrics, and prompts from the three split files.
+
+3.  `write_data_driven_optimize_config`: Construct and
+    write to GCS a new JSON configuration file for Data-Driven Optimize job
+    using a dict of parameters (including `prompt_optimizer_method` and
+    `target_model_endpoint_url` for Nano) and optionally an path to an
+    existing config to make modifications on top of.
+
+4.  `run_data_driven_optimize`: Starts a data-driven prompt optimization job on
+    Vertex AI using the SDK's `client.prompts.launch_optimization_job` method.
+    Supports specifying the `prompt_optimizer_method`. The `config_gcs_path`
+    must point to a JSON file in GCS.
+
+## Optimization Method Considerations
+- **VAPO**: Standard prompt optimization. The `batch_size` parameter
+  will be automatically removed during configuration generation to ensure SDK
+  compatibility.
+- **OPTIMIZATION_TARGET_GEMINI_NANO**: Specialized target for Gemini Nano.
+  Requires a `target_model_endpoint_url`. Supports `batch_size`.
+
+## Optimization Tuning Considerations
+
+Only suggest modifications for the parameters explicitly listed as tunable in
+the Data-Driven Optimize Tuning Guide:
+
+@./src/vertex/prompt_optimizer/docs/data_driven_optimize_tuning_guide.md
+
+with the *sole exception* of **path-related fields** to prevent overwriting
+previous results. Ensure you only modify the parameters listed in the approved
+list. If a user asks to modify a parameter that is not on the approved list
+(and is not a path-related field), confirm with the user before proceeding.
+
+## Optimization Workflows
+
+- **Initial Setup**: When asked to help configure a new optimization run, use
+  the example configuration in the Overall Guide as a valid default base.
+
+  1. **Identify Essential Parameters**: Proactively ask the user for the
+     following required fields:
+     - `project` (Your Google Cloud project ID)
+     - `train_input_data_path`
+     - `test_input_data_path`
+     - `output_path`
+     - `prompt_template` (ensure it includes `{{ placeholder }}` syntax)
+     - `eval_metrics_types` (e.g., `["exact_match"]`)
+     - `eval_metrics_weights` (e.g., `[1.0]`)
+     - `prompt_optimizer_method` (VAPO or OPTIMIZATION_TARGET_GEMINI_NANO)
+     - `target_model` (e.g., gemini-2.5-flash)
+     - `target_model_endpoint_url` (Required ONLY for Gemini Nano)
+
+  2. **Task-Specific Configuration**: You must ensure the optimization job
+     correctly maps the data by defining `data_vars` and `label_variable`.
+     - **Automated Inference**: You MUST attempt to read the first few lines of
+       the training dataset (using `run_shell_command` with `gcloud storage
+       cat`)
+       to identify column names.
+     - **Mapping**: Based on the data headers, automatically suggest:
+       - `data_vars`: all relevant columns.
+       - `label_variable`: the ground truth column.
+       - `demo_and_query_template`: (Optional) The tool will automatically
+         generate a default if you don't provide one.
+     - *Clarification*: If you cannot access the data or the headers are
+       ambiguous, ask the user to confirm the column names.
+
+  3. **Apply Sensible Defaults**: Use the default values provided in the
+     example configuration of the Overall Guide for all other fields, unless
+     the user specifies otherwise. This includes QPS limits and model
+     locations.
+
+  Once gathered, use `write_data_driven_optimize_config` to create the
+  initial configuration file.
+
+- **Analysis and Suggestions**: When asked to analyze results for a GCS or
+  local path `output_path`, perform these steps sequentially in a single turn:
+
+    1.  **Analyze**: Call `analyze_data_driven_optimize_results(output_path,
+        analysis_data_path="analysis_data.json")`. Store this output locally.
+    2.  **Formulate Suggestions**: Immediately after receiving results, and
+        without prompting the user, process the data to construct a
+        `suggested_config_data` dictionary. This dictionary should contain:
+        -   `"suggested_config"`: Modifications to allowed tuning knobs,
+            path-related fields (with a new version suffix), and optionally the
+            `prompt_template` (for baseline shifts). Ensure you prioritize
+            modifying parameters listed in the approved list.
+        -   `"rationale"`: A clear explanation of your reasoning based on the
+            Tuning Guide.
+
+        *Do not generate any other text or explanation for the user during this
+        internal phase.*
+    3.  **Generate Report**: Call `generate_html_report(analysis_data_path=
+        "analysis_data.json",
+        report_path="data_driven_optimize_analysis_report.html",
+        suggested_config_data=suggested_config_data)`.
+
+**Note:** Steps 1-3 should be executed in immediate succession without user
+interaction. Only after the report is generated should you propose applying
+the suggestions via `write_data_driven_optimize_config`.
+
+-   **Agreement Logic**: If the user agrees to apply suggestions, use the
+    `write_data_driven_optimize_config` tool with the modified parameters,
+    ensuring you update the `output_path` with a new version suffix.
+    When ready to run, use the `run_data_driven_optimize` tool, ensuring you
+    ask for the `service_account`.
+-   **Reusing Results**: If a report or further analysis is requested
+later, use
+    the stored JSON output rather than re-running the analysis tool.
+-   **General Suggestions**: If a user asks for next steps without a previous
+    analysis, run the workflow above first to ensure your advice is grounded.
+
+For detailed explanations of the Data-Driven Optimize output files and their
+structure, including how to interpret metrics and candidate information, please
+refer to the Data-Driven Optimize Output Guide:
+
+@./src/vertex/prompt_optimizer/docs/data_driven_optimize_output_analysis.md
