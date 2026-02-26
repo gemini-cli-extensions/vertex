@@ -7,6 +7,7 @@ import vertexai
 from google.cloud import storage
 from vertexai._genai import Client
 
+from . import storage as storage_utils
 from . import utils
 
 
@@ -232,3 +233,39 @@ class PromptOptimizer:
             ) from re
         except Exception as e:
             raise RuntimeError(f"An unexpected error occurred: {e}") from e
+
+    def run_few_shot_optimization(
+        self,
+        prompt_to_optimize: str,
+        example_path: str,
+        method: str,
+    ) -> str:
+        """Applies few shot prompt optimization to a prompt using user provided dataset and method.
+
+        Args:
+            prompt_to_optimize: The zero-based index of the prompt to improve.
+            example_path: GCS path to the csv file containg few-shot examples
+            method: The optimization method to use for few shot prompt improvement. The
+                method should be one of the following:
+                - TARGET_RESPONSE: Optimize the prompt to match the target response.
+                - RUBRICS: Optimize the prompt to improve the rubrics scores.
+
+        Returns:
+            Optimized prompt.
+        """
+        if not self.client:
+            raise ValueError(
+                "Error: Client was not initialized properly. Try authenticating then rerunning"
+            )
+
+        example_df = storage_utils._read_csv_from_gcs(example_path)
+        optimization_target = utils._get_optimization_target(method)
+        config = vertexai.types.OptimizeConfig(
+            optimization_target=optimization_target,
+            examples_dataframe=example_df,
+        )
+        response = self.client.prompts.optimize(
+            prompt=prompt_to_optimize,
+            config=config,
+        )
+        return response.parsed_response.suggested_prompt
