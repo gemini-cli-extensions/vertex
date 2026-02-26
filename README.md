@@ -17,6 +17,10 @@ This extension provides tools to manage prompts and work with data-driven prompt
 *   **Results Analysis**: Perform deep-dive analysis of optimization results, including learning curves and candidate comparisons.
 *   **Automated Reporting**: Generate comprehensive HTML reports with tuning suggestions for subsequent runs.
 
+### Few-Shot Prompt Optimizer
+*  **Prompt Optimization**: tunes the given prompt by utilizing small set of user-provided examples using few-shot prompt optimization. For more details about the algorithm, please refer to this [documentation](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/few-shot-optimizer) or this [guide](@./src/vertex/prompt_optimizer/docs/few_shot_prompt_optimization_guide.md).
+
+
 ## Prerequisites
 
 *   You have the [Gemini CLI](https://github.com/google-gemini/gemini-cli) installed.
@@ -63,7 +67,7 @@ Here are a few examples:
 
 For more detailed information on all available commands and their parameters, please refer to the `extension/commands` files.
 
-### Prompt Optimizer Examples
+### Data-Driven Prompt Optimizer Examples
 
 *   **Analyze optimization results**:
     ```bash
@@ -81,6 +85,17 @@ For more detailed information on all available commands and their parameters, pl
     ```
 
 For more detailed information on all available commands and workflows, please refer to the `GEMINI.md` file in this repository.
+
+### Few-Shot Prompt Optimization Examples
+*   **Few-shot optimization with target response**:
+When user examples consit of `(question, model_response, target_response)`, few-shot optimization should be run with "target response" method.
+    ```bash
+    gemini "Apply few-shot prompt optimization using target response with data from gs://your_bucket/your_examples.csv. Here is the prompt: '...'"
+
+*   **Few-shot optimization with rubrics and evaluations**:
+When user examples consit of `(question, model_response, rubrics, rubrics_evaluations)`, few-shot optimization should be run with "rubrics" method.
+    ```bash
+    gemini "Apply few-shot prompt optimization using rubrics with data from gs://your_bucket/your_examples.csv. Here is the prompt: '...'"
 
 ## Development
 

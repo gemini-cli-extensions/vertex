@@ -1,6 +1,6 @@
 # Vertex AI Gemini CLI Extension
 
-This extension provides tools to manage prompts and use the data-driven prompt
+This extension provides tools to manage prompts and use prompt
 optimization in Vertex AI directly from the Gemini CLI.
 
 ## Available Tools
@@ -12,8 +12,10 @@ optimization in Vertex AI directly from the Gemini CLI.
 - `delete_prompt`: To remove prompts.
 - `list_prompts`: To search and list prompts, useful for finding IDs.
 
-### Data-Driven Optimization Tools
-- `run_data_driven_optimize`: Starts a data-driven prompt optimization job on
+### Prompt Optimization Tools
+- `run_few_shot_optimization`: optimize user prompt based on examples provided 
+  in the CSV file stored in the GCS bucket.
+-`run_data_driven_optimize`: Starts a data-driven prompt optimization job on
   Vertex AI using a configuration file stored in GCS.
 - `analyze_data_driven_optimize_results`: Analyzes the output of a Data-Driven
   Optimize job to identify trends and best-performing candidates.
@@ -275,6 +277,28 @@ If any tool call fails with an error indicating a project permission issue (e.g.
 
 ---
 
+## Few-Shot Prompt Optimization Guide
+Few-shot prompt optimization is a tool used to refine a prompt (or system instructions) based on user-provided examples. These examples are stored in a CSV file and user must provide a GCS path to this data. The examples must follow one of two formats:
+`("prompt", "model_response", "target_response")` or 
+`("prompt", "model_response", "rubrics", "rubrics_evaluations")`.
+Depending on the format of the examples provided in the user's CSV file, the optimization uses one of the following methods:
+`TARGET_RESPONSE`: The prompt is tuned to generate outputs that closely align with a provided  ground-truth answer.
+`RUBRICS`: The model analyzes rubric rules and evaluation scores to tune the prompt and address specific failures.
+For more details, please refer to this guide: @./src/vertex/prompt_optimizer/docs/few_shot_prompt_optimization_guide.md
+The tool is accessed through `run_few_shot_prompt_optimization(prompt_to_optimize: str,
+  example_path: str, method: str)`. This tool should be called directly on the raw prompt without invoking create_prompt or any other tool first.
+
+## Few-shot Optimization Workflows
+
+- When asked to run few-shot prompt optimization, identify if all required parameters are passed.
+  1. **Identify Essential Parameters**: Proactively ask the user for the
+     following required fields:
+     - `prompt_to_optimize`        
+     - `example_path`
+     - `method`
+
+  2. Once the parameters are set, call the `run_few_shot_prompt_optimization` with those params.
+
 ## Data-Driven Prompt Optimizer Overall Guide
 
 For a general understanding of Data-Driven Prompt Optimizer and its
@@ -283,7 +307,7 @@ refer to the Data-Driven Optimize Overall Guide:
 
 @./src/vertex/prompt_optimizer/docs/data_driven_optimize_overall_guide.md
 
-## Optimization Tool Details
+## Data-Driven Optimization Tool Details
 
 The extension provides a suite of tools to parse and analyze the output of a
 Data-Driven Prompt Optimizer job. The `output_path` for these tools stores
@@ -322,14 +346,14 @@ file system for analysis.
     Supports specifying the `prompt_optimizer_method`. The `config_gcs_path`
     must point to a JSON file in GCS.
 
-## Optimization Method Considerations
+## Data-Driven Optimization Method Considerations
 - **VAPO**: Standard prompt optimization. The `batch_size` parameter
   will be automatically removed during configuration generation to ensure SDK
   compatibility.
 - **OPTIMIZATION_TARGET_GEMINI_NANO**: Specialized target for Gemini Nano.
   Requires a `target_model_endpoint_url`. Supports `batch_size`.
 
-## Optimization Tuning Considerations
+## Data-Driven Optimization Tuning Considerations
 
 Only suggest modifications for the parameters explicitly listed as tunable in
 the Data-Driven Optimize Tuning Guide:
@@ -341,7 +365,7 @@ previous results. Ensure you only modify the parameters listed in the approved
 list. If a user asks to modify a parameter that is not on the approved list
 (and is not a path-related field), confirm with the user before proceeding.
 
-## Optimization Workflows
+## Data-Driven Optimization Workflows
 
 - **Initial Setup**: When asked to help configure a new optimization run, use
   the example configuration in the Overall Guide as a valid default base.

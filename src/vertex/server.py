@@ -39,6 +39,10 @@ def main(argv: Sequence[str]) -> None:
         name="run_data_driven_optimize",
     )
     mcp.add_tool(
+        optimizer_tools.run_few_shot_optimization,
+        name="run_few_shot_optimization",
+    )
+    mcp.add_tool(
         analyzer.analyze_results, name="analyze_data_driven_optimize_results"
     )
     mcp.add_tool(analyzer.generate_report, name="generate_html_report")

@@ -1,0 +1,18 @@
+name = "run_few_shot_prompt_optimization"
+description = "Optimize a prompt based on few examples using few-shot optimization from Vertex AI SDK."
+prompt = """
+You are tasked to call `run_few_shot_prompt_optimization` tool call.
+
+**Parameters:**
+
+1. **`prompt_to_optimize` (string, required):**
+    *   **Source:** Prompt (or system instructions) that will be optimized.
+2. **`example_path` (string, required):**
+    *   **Source:** The GCS URI to the CSV file containing examples
+3. **`method:` (string, required):** 
+    *   **Source:** The method for prompt optimization. Either "TARGET_RESPONSE" or "RUBRICS"
+
+
+**Clarification Policy:**
+If `prompt_to_optimize`, `example_path` or `method` is missing, ask the user for it.
+"""

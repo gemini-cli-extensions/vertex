@@ -2,6 +2,8 @@
 
 from typing import Any
 
+import vertexai
+
 
 def merge_configs(
     base_config: dict[str, Any], modifications: dict[str, Any]
@@ -19,3 +21,15 @@ def merge_configs(
         else:
             merged_config[key] = value
     return merged_config
+
+
+def _get_optimization_target(method: str) -> vertexai.types.OptimizeTarget:
+    """Returns the optimization target for the given method."""
+    if method == "TARGET_RESPONSE":
+        return vertexai.types.OptimizeTarget.OPTIMIZATION_TARGET_FEW_SHOT_TARGET_RESPONSE
+    elif method == "RUBRICS":
+        return (
+            vertexai.types.OptimizeTarget.OPTIMIZATION_TARGET_FEW_SHOT_RUBRICS
+        )
+    else:
+        raise ValueError(f"Unsupported optimization method: {method}")

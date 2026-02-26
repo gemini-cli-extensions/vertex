@@ -1,9 +1,11 @@
 """Utility functions for reading from and writing to GCS or local paths."""
 
+import io
 import json
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 from google.cloud import storage
 
 EXPECTED_GCS_PARTS = 2
@@ -31,6 +33,23 @@ def _read_json_from_gcs(gcs_uri: str) -> Any:
         return json.loads(blob.download_as_string())
     except Exception as e:
         raise RuntimeError(f"Failed to read from GCS URI {gcs_uri}: {e}") from e
+
+
+def _read_csv_from_gcs(path: str) -> pd.DataFrame:
+    if not _is_gcs_path(path) or not path.endswith(".csv"):
+        raise ValueError(
+            "Few-shot examples must be stored as CSV file in a GCS bucket, ",
+            f"but `{path}` was provided",
+        )
+    try:
+        storage_client = storage.Client()
+        bucket_name, blob_name = _parse_gcs_uri(path)
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+        csv_bytes = blob.download_as_bytes()
+        return pd.read_csv(io.BytesIO(csv_bytes))
+    except Exception as e:
+        raise RuntimeError(f"Failed to read from GCS URI {path}: {e}") from e
 
 
 def _write_json_to_gcs(data: Any, gcs_uri: str):
