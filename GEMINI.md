@@ -15,7 +15,7 @@ optimization in Vertex AI directly from the Gemini CLI.
 ### Prompt Optimization Tools
 - `run_few_shot_optimization`: optimize user prompt based on examples provided 
   in the CSV file stored in the GCS bucket.
--`run_data_driven_optimize`: Starts a data-driven prompt optimization job on
+- `run_data_driven_optimize`: Starts a data-driven prompt optimization job on
   Vertex AI using a configuration file stored in GCS.
 - `analyze_data_driven_optimize_results`: Analyzes the output of a Data-Driven
   Optimize job to identify trends and best-performing candidates.
